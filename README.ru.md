@@ -169,7 +169,7 @@ claude mcp add wordcraft -- node "$PWD/dist/bundle.cjs"
 ```bash
 npm run build       # TypeScript + бандл в одном файле (dist/bundle.cjs)
 npm test            # модульные тесты (логика путей Windows, macOS и Linux)
-npm run test:e2e    # 26 сквозных проверок (28 с `E2E_LIVE=1`) через настоящий MCP stdio (синтетические изображение и CSV)
+npm run test:e2e    # 29 сквозных проверок (31 с `E2E_LIVE=1`) через настоящий MCP stdio (синтетические изображение и CSV)
 npm run pack:mcpb   # wordcraft-mcp-server.mcpb
 npm run pack:codex  # zip плагина для Codex / DeepSeek Harness
 ```

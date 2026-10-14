@@ -109,6 +109,7 @@ const created = await call('create_document', {
     { type: 'footnote', text: 'Fuente: datos internos.' },
     { type: 'heading', text: 'Resultados', level: 1 },
     { type: 'table', rows: [['Región', 'Ventas', 'Cambio'], ['Norte', '1.200', '+8 %'], ['Sur', '950', '+15 %']], caption: 'Ventas por región' },
+    { type: 'footnote', text: 'Cifras sin auditar.' },
     { type: 'image', path: chart, width: 300, alt: 'Gráfico de barras', caption: 'Ventas por mes' },
     { type: 'page_break' },
     { type: 'heading', text: 'Anexo', level: 1 },
@@ -132,9 +133,16 @@ check(info.body.pages >= 2 && info.body.words > 40, `info: ${info.body.pages} pa
 check(styles.filter((s) => s === 'Heading1').length === 3 && styles.includes('Heading2') && styles.includes('Title'), `headings and title styles (${[...new Set(styles)].join(',')})`);
 const table = blocks.find((b) => b.type === 'table');
 check(table?.rows === 3 && table?.cols === 3 && table.cells?.[2]?.[2] === '+15 %', 'table 3x3 with its cells (no extra row)');
+const ti = blocks.indexOf(table);
+check(blocks[ti - 1]?.style === 'Caption' && !(blocks[ti + 1]?.type === 'paragraph' && blocks[ti + 1]?.style === 'Normal' && !blocks[ti + 1]?.text && !blocks[ti + 2]?.style?.startsWith('Caption')), `caption right above the table, no empty paragraph below (${blocks[ti + 1]?.style} "${blocks[ti + 1]?.text ?? ''}")`);
 const listedItems = blocks.filter((b) => b.list).map((b) => b.text);
 check(['Crecer en Colombia', 'Abrir Perú', 'Reducir costos', 'Planificar', 'Ejecutar', 'Medir'].every((t) => listedItems.includes(t)), 'bullet and numbered items');
 check(!blocks.find((b) => b.text === 'Después de las listas, texto normal.')?.list, 'paragraph after a list is not a list item');
+const noteHolders = blocks.filter((b) => b.notes).map((b) => b.text);
+check(noteHolders.length === 1 && noteHolders[0] === 'Después de las listas, texto normal.', `footnote mark stays on its paragraph; the one after a table goes in the table (${JSON.stringify(noteHolders)})`);
+const centered = blocks.find((b) => b.text === 'Dato destacado en negrita roja.');
+const afterCentered = blocks.find((b) => b.text === 'Objetivos');
+check(centered?.align === 'center' && !afterCentered?.align, `alignment stays on its own block (${centered?.align} → ${afterCentered?.align ?? 'style default'})`);
 
 // text
 const text = await call('extract_text', { input_path: docx, save_txt: true, output_dir: join(src, 'txt') });

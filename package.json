@@ -1,6 +1,6 @@
 {
   "name": "wordcraft-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for WordCraft: write documents (headings, lists, tables, images, table of contents, headers and footers), edit them with find/replace, comments and tracked changes, mail-merge from CSV or spreadsheets, convert between docx, pdf, odt, rtf, html, md and tex, and preview pages with WordCraft's own engine, from Claude (Windows, macOS, Linux).",
   "type": "module",
   "main": "dist/index.js",

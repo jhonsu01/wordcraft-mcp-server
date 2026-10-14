@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.1] - 2026-10-14
+### Fixed
+- `create_document` / `edit_document`: a block's `align` no longer carries over to the blocks after it (a centred
+  paragraph used to centre every heading, list and paragraph that followed).
+- A table `caption` no longer leaves an empty paragraph between the table and the next block.
+- Footnotes: the mark now stays at the end of the block it follows (it used to move to the start of the next
+  paragraph), a footnote right after a table goes in its last cell, and the text after a footnote no longer takes
+  the mark's small character style.
+### Added
+- `get_document_info` (`include_structure`) reports each paragraph's alignment and footnote marks.
+### Verified
+- Windows 11 and Debian 12 (Docker): 29/29 end-to-end checks each (new: alignment, caption placement, footnote
+  placement; all three fail on 1.0.0); a two-page report with a table of contents checked page by page.
+
 ## [1.0.0] - 2026-10-13
 ### Added
 - First release: 11 tools over WordCraft's headless engine (`wordcraft-cli mcp`) for Windows, macOS and Linux:

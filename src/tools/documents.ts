@@ -95,6 +95,10 @@ type PropOpts = { [K in keyof typeof propertiesSchema]?: z.infer<(typeof propert
 export class BlockWriter {
   private fresh = true;
   private inList = false;
+  private aligned = false;
+  private afterNote = false;
+  /** End of the last cell of a table just written (a footnote right after the table goes there). */
+  private lastCell?: Record<string, unknown>;
   readonly warnings: string[] = [];
   hasToc = false;
 
@@ -108,7 +112,18 @@ export class BlockWriter {
   private async newBlock(style = 'Normal'): Promise<void> {
     if (!this.fresh) await this.s.cmd('text.newParagraph');
     this.fresh = false;
+    this.lastCell = undefined;
+    if (this.aligned) {
+      // a new paragraph keeps the previous one's direct alignment
+      await this.s.cmd('para.reset');
+      this.aligned = false;
+    }
     await this.s.cmd('styles.apply', { style });
+    if (this.afterNote) {
+      // a paragraph started after a footnote mark would keep the mark's character style
+      await this.s.cmd('format.resetChar');
+      this.afterNote = false;
+    }
     if (this.inList) {
       // a new paragraph after a list inherits its numbering
       await this.s.cmd('para.numbering', { off: true }).catch(() => undefined);
@@ -118,7 +133,9 @@ export class BlockWriter {
   }
 
   private async align(value?: string): Promise<void> {
-    if (value) await this.s.cmd('para.align', { value });
+    if (!value) return;
+    await this.s.cmd('para.align', { value });
+    this.aligned = true;
   }
 
   private async typeFormatted(text: string, f: { bold?: boolean; italic?: boolean; underline?: boolean; font?: string; size?: number; color?: string; highlight?: string }): Promise<void> {
@@ -160,6 +177,10 @@ export class BlockWriter {
         if (block.caption) {
           await this.newBlock('Normal');
           await this.s.cmd('references.caption', { label: 'Table', text: block.caption, position: 'above' }).catch((e) => this.warnings.push(String(e)));
+          // an "above" caption goes before the (empty) current paragraph and leaves the caret in the caption:
+          // step into that paragraph and put the table there, not in yet another one
+          await this.s.cmd('caret.right');
+          this.fresh = true;
         }
         await this.newBlock('Normal');
         const cols = Math.max(...block.rows.map((r) => r.length));
@@ -176,9 +197,11 @@ export class BlockWriter {
             if (!(r === block.rows.length - 1 && c === cols - 1)) await this.s.cmd('text.tab');
           }
         }
+        const cell = await this.s.cmd('document.selection').catch(() => undefined);
         // leave the table: the caret lands on the (empty) paragraph after it
         await this.s.cmd('caret.docEnd');
         this.fresh = true;
+        this.lastCell = cell?.focus ?? cell?.anchor;
         break;
       }
       case 'image': {
@@ -205,12 +228,25 @@ export class BlockWriter {
         this.fresh = false;
         break;
       case 'footnote': {
+        // after a table the caret is on the empty paragraph below it: put the mark at the end of the last cell
+        if (this.fresh && this.lastCell && Array.isArray(this.lastCell.path)) {
+          const below = await this.s.cmd('document.selection');
+          await this.s.cmd('caret.set', { pos: this.lastCell });
+          await this.s.cmd('references.footnote', { text: block.text });
+          await this.s.cmd('caret.set', { pos: below?.focus ?? below?.anchor });
+          break;
+        }
         // inserting a footnote moves the caret into the footnote: come back to the body, right after the reference mark
         const sel = await this.s.cmd('document.selection').catch(() => undefined);
         const at = sel?.focus ?? sel?.anchor;
         await this.s.cmd('references.footnote', { text: block.text });
-        if (at && Array.isArray(at.path)) await this.s.cmd('caret.set', { pos: { ...at, off: Number(at.off ?? 0) + 1 } });
-        else throw new Error('footnote: could not find the caret position to return to.');
+        if (at && Array.isArray(at.path)) {
+          // the mark is the last thing in the paragraph: go back to it and to the paragraph's end
+          await this.s.cmd('caret.set', { pos: at });
+          await this.s.cmd('caret.end');
+          this.afterNote = true;
+          this.fresh = false;
+        } else throw new Error('footnote: could not find the caret position to return to.');
         break;
       }
     }
@@ -592,6 +628,11 @@ export function registerDocumentTools(server: McpServer): void {
                       text: String(b.text ?? '').slice(0, 2000),
                       // numbering num 0 means "no list" (a list switched off)
                       ...(Number((b.props as { numbering?: { num?: number } })?.numbering?.num ?? 0) > 0 ? { list: true } : {}),
+                      ...((b.props as { align?: string })?.align ? { align: (b.props as { align: string }).align } : {}),
+                      ...(() => {
+                        const notes = ((b.objects as { type?: string }[] | undefined) ?? []).filter((o) => o.type === 'noteRef').length;
+                        return notes ? { notes } : {};
+                      })(),
                     },
               );
             }
