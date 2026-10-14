@@ -1,0 +1,126 @@
+{
+  "manifest_version": "0.3",
+  "name": "wordcraft-mcp-server",
+  "version": "1.0.0",
+  "display_name": "WordCraft Bridge",
+  "description": "Write, edit (find/replace, comments, tracked changes), mail-merge, convert and preview documents with the WordCraft word processor installed on Windows, macOS or Linux. Not affiliated with WordCraft or Storytold.",
+  "long_description": "WordCraft Bridge lets Claude write and edit documents with the WordCraft you already have installed on Windows, macOS or Linux (tested with 0.6.1 on Windows 11), the open-source, Word-class word processor written in Rust.\n\n- **Write** new documents from headings, paragraphs with styles and formatting, bullet and numbered lists, tables, images with captions, page breaks, a table of contents and footnotes, blank or from the letter, resume and report templates, with page size, margins, headers, footers and page numbers.\n- **Edit** existing documents: find and replace (match case, whole word, wildcards), comments on any text, tracked changes so every edit is reviewable, accept or reject revisions, append content, remove personal information.\n- **Mail merge** letters, certificates or notices from CSV, TSV, XLSX or ODS, with a template or a body written with {{Field}} placeholders.\n- **Convert** between DOCX, DOC (read), PDF, ODT, RTF, HTML, Markdown, LaTeX, TXT and PNG, optionally with comments and changes printed (Print Markup).\n- **Inspect**: page and word counts, properties, structure, plain text and page previews.\n- **Advanced**: run any of WordCraft's 615 engine commands and open results in the WordCraft app.\n\nThe connector drives WordCraft's own headless engine (wordcraft-cli). Everything runs locally with no network access; originals are only read and files are never overwritten unless you ask. WordCraft is an open-source project by Storytold; this connector is not affiliated with or endorsed by them.",
+  "author": {
+    "name": "Jhon Supelano",
+    "url": "https://github.com/jhonsu01"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhonsu01/wordcraft-mcp-server.git"
+  },
+  "homepage": "https://github.com/jhonsu01/wordcraft-mcp-server",
+  "support": "https://github.com/jhonsu01/wordcraft-mcp-server/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/bundle.cjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/bundle.cjs"
+      ],
+      "env": {
+        "WORDCRAFT_DIR": "${user_config.wordcraft_dir}",
+        "WORDCRAFT_CLI": "${user_config.wordcraft_cli}",
+        "WORDCRAFT_CONTROL_PORT": "${user_config.control_port}"
+      }
+    }
+  },
+  "user_config": {
+    "wordcraft_dir": {
+      "type": "directory",
+      "title": "WordCraft folder",
+      "description": "Install folder of WordCraft (or WordCraft.app on macOS). Leave empty to auto-detect: C:\\Program Files\\WordCraft, /Applications/WordCraft.app, /usr/bin, /opt/wordcraft or PATH.",
+      "required": false
+    },
+    "wordcraft_cli": {
+      "type": "file",
+      "title": "wordcraft-cli executable (optional)",
+      "description": "Only if it is somewhere else, e.g. where you unzipped the wordcraft-cli zip on macOS.",
+      "required": false
+    },
+    "control_port": {
+      "type": "string",
+      "title": "WordCraft control port (optional)",
+      "description": "Port used to drive the WordCraft app (open_in_wordcraft, run_wordcraft_commands live). Default 7985.",
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "win32",
+      "darwin",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "tools": [
+    {
+      "name": "create_document",
+      "description": "Write a new document: headings, lists, tables, images, table of contents, headers, footers"
+    },
+    {
+      "name": "edit_document",
+      "description": "Find and replace, comments, tracked changes and appended content on existing documents"
+    },
+    {
+      "name": "mail_merge",
+      "description": "Personalized letters from a CSV or spreadsheet (template or {{Field}} body)"
+    },
+    {
+      "name": "convert_document",
+      "description": "Convert between docx, doc, pdf, odt, rtf, html, md, tex, txt and png"
+    },
+    {
+      "name": "get_document_info",
+      "description": "Pages, words, comments, tracked changes, properties and structure"
+    },
+    {
+      "name": "extract_text",
+      "description": "Plain text of one or many documents"
+    },
+    {
+      "name": "render_pages",
+      "description": "Render document pages to PNG"
+    },
+    {
+      "name": "list_wordcraft_catalog",
+      "description": "Engine commands, styles, templates and formats"
+    },
+    {
+      "name": "run_wordcraft_commands",
+      "description": "Run any WordCraft engine command, headless or in the live app"
+    },
+    {
+      "name": "open_in_wordcraft",
+      "description": "Open documents in the WordCraft app"
+    },
+    {
+      "name": "get_wordcraft_status",
+      "description": "Check the WordCraft installation, version and commands"
+    }
+  ],
+  "keywords": [
+    "wordcraft",
+    "word",
+    "docx",
+    "documents",
+    "word-processor",
+    "mail-merge",
+    "tracked-changes",
+    "pdf",
+    "odt",
+    "markdown",
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "license": "Apache-2.0"
+}
