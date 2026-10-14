@@ -183,4 +183,4 @@ docker run --rm -v "$PWD:/work:ro" -v "/chemin/vers/wordcraft-0.6.1-linux-x86_64
 ## Licence
 
 Apache-2.0. WordCraft est © ses auteurs (Storytold), MIT ou Apache-2.0.
-Ce projet n'est ni affilié ni approuvé par WordCraft ou Storytold. Word est une marque d'Microsoft.
+Ce projet n'est ni affilié ni approuvé par WordCraft ou Storytold. Word est une marque de Microsoft.

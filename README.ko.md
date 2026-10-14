@@ -183,4 +183,4 @@ docker run --rm -v "$PWD:/work:ro" -v "/path/to/wordcraft-0.6.1-linux-x86_64:/op
 ## 라이선스
 
 Apache-2.0. WordCraft의 저작권은 저작자(Storytold)에게 있으며 MIT 또는 Apache-2.0으로 제공됩니다.
-이 프로젝트는 WordCraft 또는 Storytold와 관련이 없으며 이들의 보증을 받지 않았습니다. Word은 Microsoft의 상표입니다.
+이 프로젝트는 WordCraft 또는 Storytold와 관련이 없으며 이들의 보증을 받지 않았습니다. Word는 Microsoft의 상표입니다.
